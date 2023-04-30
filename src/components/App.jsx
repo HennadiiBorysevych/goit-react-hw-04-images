@@ -1,5 +1,5 @@
 import '../index.css';
-import {useState,useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import { fetchImages } from './api';
 import { Searchbar, ImageGallery, Button, Modal } from './index';
 import { MagnifyingGlass } from 'react-loader-spinner';
@@ -11,6 +11,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [largeImageURL, setLargeImageURL] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [isShownLoadMoreBtn, setisShownLoadMoreBtn] = useState(false);
 
   const handleSubmit = value => {
     setValue(value);
@@ -24,7 +25,8 @@ const App = () => {
       setTimeout(() => {
         fetchImages(value, 1)
           .then(data => {
-            setData(data);
+            setisShownLoadMoreBtn(1 < data.totalHits / 12);
+            setData(data.hits);
             setIsLoading(false);
           })
           .catch(error => console.log(error));
@@ -36,43 +38,33 @@ const App = () => {
     if (page !== 1) {
       setIsLoading(true);
       fetchImages(value, page)
-
-        .then(data => { 
-          setData(prevState => [...prevState, ...data]);
-          setIsLoading(false);  
+        .then(data => {
+          setisShownLoadMoreBtn(page < data.totalHits / 12);
+          setData(prevState => [...prevState, ...data.hits]);
+          setIsLoading(false);
         })
         .catch(error => console.log(error));
     }
-  }, [page, value]);       
+  }, [page, value]);
 
-  const  handleModalClick = largeImageURL => {
+  const handleModalClick = largeImageURL => {
     setLargeImageURL(largeImageURL);
     setModalOpen(true);
   };
   const onModalClose = () => {
     setModalOpen(false);
   };
-    return (
-      <>
-        <Searchbar onSubmit={handleSubmit} />
-        {isLoading && (
-          <MagnifyingGlass visible={true} glassColor="#c0efff" />
-        )}
-        <ImageGallery
-          data={data}
-          modalClick={handleModalClick}
-        />
-        {data.length > 0 ? (
-          <Button handleLoadMore={handleLoadMore} />
-        ) : null}
-        {modalOpen && (
-          <Modal
-            largeImageURL={largeImageURL}
-            onClose={onModalClose}
-          />
-        )}
-      </>
-    );
-  }
+  return (
+    <>
+      <Searchbar onSubmit={handleSubmit} />
+      {isLoading && <MagnifyingGlass visible={true} glassColor="#c0efff" />}
+      <ImageGallery data={data} modalClick={handleModalClick} />
+      {isShownLoadMoreBtn && <Button onClick={handleLoadMore} />}
+      {modalOpen && (
+        <Modal largeImageURL={largeImageURL} onClose={onModalClose} />
+      )}
+    </>
+  );
+};
 
 export default App;

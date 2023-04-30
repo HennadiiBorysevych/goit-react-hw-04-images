@@ -6,5 +6,5 @@ export const fetchImages = (query, page) => {
     .then(response =>
       response.ok ? response.json() : Promise.reject(response)
     )
-    .then(data => data.hits);
+    .then(data => data);
 };

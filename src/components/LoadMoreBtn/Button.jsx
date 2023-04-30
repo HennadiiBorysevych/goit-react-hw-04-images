@@ -1,10 +1,15 @@
 import clsx from 'clsx';
+import PropTypes from 'prop-types';
 
-const Button = ({ handleLoadMore }) => {
+const Button = ({ onClick }) => {
   return (
-    <button onClick={handleLoadMore} className={clsx('Button')} type="submit">
+    <button onClick={onClick} className={clsx('Button')} type="button">
       Load More
     </button>
   );
 };
 export default Button;
+
+Button.propTypes= {
+  onClick: PropTypes.func.isRequired,
+}
